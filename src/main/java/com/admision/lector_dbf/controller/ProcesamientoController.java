@@ -91,7 +91,7 @@ public class ProcesamientoController {
 
         List<Examen> examenes =
                 examenRepository
-                        .findByProcesoAdmisionOrderByPuntajeDesc(
+                        .findExamenesConAlumnoYCarrera(
                                 proceso
                         );
 

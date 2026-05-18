@@ -76,11 +76,11 @@
                     <tr th:each="examen : ${examenes}"
                         th:classappend="${examen.anulado} ? 'table-danger' : ''">
 
-                        <td>No definida</td>
+                        <td th:text="${examen.alumno.carrera.nombre}"></td>
 
-                        <td th:text="${examen.litho}"></td>
+                        <td th:text="${examen.alumno.codigo}"></td>
 
-                        <td>Sin alumno</td>
+                        <td th:text="${examen.alumno.nombres}"></td>
 
                         <td th:text="${examen.correctas}"></td>
 

@@ -4,7 +4,9 @@ import com.admision.lector_dbf.dto.IdentifiDTO;
 import com.admision.lector_dbf.dto.RespuestDTO;
 import com.admision.lector_dbf.entity.Examen;
 import com.admision.lector_dbf.repository.ExamenRepository;
+import com.admision.lector_dbf.repository.AlumnoRepository;
 import com.admision.lector_dbf.entity.ProcesoAdmision;
+import com.admision.lector_dbf.entity.Alumno;
 import com.admision.lector_dbf.repository.ProcesoAdmisionRepository;
 import com.admision.lector_dbf.entity.Clave;
 import com.admision.lector_dbf.repository.ClaveRepository;
@@ -23,6 +25,8 @@ public class ProcesamientoService {
 
     @Autowired
     private ExamenRepository examenRepository;
+    @Autowired
+    private AlumnoRepository alumnoRepository;
     @Autowired
     private ProcesoAdmisionRepository procesoAdmisionRepository;
     @Autowired
@@ -71,6 +75,22 @@ public class ProcesamientoService {
             }
 
             Examen examen = new Examen();
+
+            //buscar estudiante en la BD mediante el código de alumno
+            String codigoAlumno = identifi.getCodigo();
+
+            Optional<Alumno> alumnoOptional = alumnoRepository.findByCodigo(codigoAlumno);
+
+            Alumno alumno;
+
+            if (alumnoOptional.isPresent()) {
+                alumno = alumnoOptional.get();
+            } else {
+                alumno = new Alumno();
+                alumno.setCodigo(codigoAlumno);
+                alumno = alumnoRepository.save(alumno);
+            }
+            examen.setAlumno(alumno);
 
             examen.setProcesoAdmision(
                     proceso
