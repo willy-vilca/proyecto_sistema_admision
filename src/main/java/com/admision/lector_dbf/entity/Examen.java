@@ -19,6 +19,10 @@ public class Examen {
 
     private Double puntaje;
 
+    private Integer ordenMerito;
+
+    private Boolean ingreso;
+
     private Integer correctas;
 
     private Integer incorrectas;
@@ -147,5 +151,21 @@ public class Examen {
             ProcesoAdmision procesoAdmision
     ) {
         this.procesoAdmision = procesoAdmision;
+    }
+
+    public Integer getOrdenMerito() {
+        return ordenMerito;
+    }
+
+    public void setOrdenMerito(Integer ordenMerito) {
+        this.ordenMerito = ordenMerito;
+    }
+
+    public Boolean getIngreso() {
+        return ingreso;
+    }
+
+    public void setIngreso(Boolean ingreso) {
+        this.ingreso = ingreso;
     }
 }

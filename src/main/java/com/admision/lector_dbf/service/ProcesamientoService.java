@@ -3,22 +3,24 @@ package com.admision.lector_dbf.service;
 import com.admision.lector_dbf.dto.IdentifiDTO;
 import com.admision.lector_dbf.dto.RespuestDTO;
 import com.admision.lector_dbf.entity.Examen;
-import com.admision.lector_dbf.repository.ExamenRepository;
-import com.admision.lector_dbf.repository.AlumnoRepository;
+import com.admision.lector_dbf.entity.Carrera;
+import com.admision.lector_dbf.repository.*;
 import com.admision.lector_dbf.entity.ProcesoAdmision;
 import com.admision.lector_dbf.entity.Alumno;
-import com.admision.lector_dbf.repository.ProcesoAdmisionRepository;
 import com.admision.lector_dbf.entity.Clave;
-import com.admision.lector_dbf.repository.ClaveRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linuxense.javadbf.DBFReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Service
 public class ProcesamientoService {
@@ -31,6 +33,8 @@ public class ProcesamientoService {
     private ProcesoAdmisionRepository procesoAdmisionRepository;
     @Autowired
     private ClaveRepository claveRepository;
+    @Autowired
+    private CarreraRepository carreraRepository;
 
     private final ObjectMapper objectMapper =
             new ObjectMapper();
@@ -166,6 +170,9 @@ public class ProcesamientoService {
 
             examenRepository.save(examen);
         }
+
+        recalcularOrdenMerito(proceso);
+        recalcularIngresantes(proceso);
     }
 
     private Map<String, IdentifiDTO> leerIdentifi(
@@ -400,5 +407,173 @@ public class ProcesamientoService {
         examen.setBlancas(blancas);
 
         examen.setPuntaje(puntaje);
+    }
+
+    public void recalcularOrdenMerito(
+            ProcesoAdmision proceso
+    ) {
+
+        List<Examen> examenes = examenRepository.findByProcesoAdmisionAndAnuladoFalse(proceso);
+
+        // LIMPIAR ORDENES ANTIGUAS
+        for (Examen examen : examenes) {
+            examen.setOrdenMerito(null);
+        }
+
+        // AGRUPAR POR CARRERA
+        Map<Long, List<Examen>> examenesPorCarrera =
+                examenes.stream()
+                        .filter(examen ->
+                                examen.getAlumno() != null
+                                        &&
+                                        examen.getAlumno().getCarrera() != null
+                        )
+                        .collect(
+                                Collectors.groupingBy(
+                                        examen ->
+                                                examen.getAlumno()
+                                                        .getCarrera()
+                                                        .getId()
+                                )
+                        );
+
+        // PROCESAR CADA CARRERA
+        for (List<Examen> listaCarrera
+                : examenesPorCarrera.values()) {
+            // ORDENAR DESCENDENTE
+            listaCarrera.sort(
+                    Comparator.comparing(
+                            Examen::getPuntaje
+                    ).reversed()
+            );
+
+            int posicionReal = 1;
+            int ordenActual = 1;
+            Double puntajeAnterior = null;
+
+            for (Examen examen : listaCarrera) {
+                if (puntajeAnterior != null && examen.getPuntaje().equals(puntajeAnterior)) {
+                    examen.setOrdenMerito(
+                            ordenActual
+                    );
+                } else {
+                    ordenActual = posicionReal;
+                    examen.setOrdenMerito(
+                            ordenActual
+                    );
+                }
+                puntajeAnterior = examen.getPuntaje();
+                posicionReal++;
+            }
+        }
+
+        examenRepository.saveAll(examenes);
+    }
+
+    public void recalcularIngresantes(
+            ProcesoAdmision proceso
+    ) {
+
+        List<Examen> examenes = examenRepository.findByProcesoAdmision(proceso);
+
+        // Reiniciamos todos los ingresos
+        for (Examen examen : examenes) {
+            examen.setIngreso(false);
+        }
+
+        // FILTRAR SOLO EXÁMENES VÁLIDOS
+        List<Examen> examenesValidos =
+                examenes.stream()
+                        .filter(examen ->
+                                !Boolean.TRUE.equals(
+                                        examen.getAnulado()
+                                )
+                                        &&
+                                        examen.getAlumno() != null
+                                        &&
+                                        examen.getAlumno().getCarrera() != null
+                                        &&
+                                        examen.getOrdenMerito() != null
+                        )
+                        .toList();
+
+        // AGRUPAR POR CARRERA
+        Map<Long, List<Examen>> examenesPorCarrera =
+                examenesValidos.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        examen -> examen.getAlumno()
+                                                .getCarrera()
+                                                .getId()
+                                )
+                        );
+
+        // PROCESAR CADA CARRERA
+        for (List<Examen> listaCarrera : examenesPorCarrera.values()) {
+
+            // ORDENAR POR ORDEN MÉRITO
+            listaCarrera.sort(
+                    Comparator.comparing(
+                            Examen::getOrdenMerito
+                    )
+            );
+
+            Carrera carrera = listaCarrera.get(0).getAlumno().getCarrera();
+
+            Integer vacantes = carrera.getVacantes();
+
+            // SI NO HAY VACANTES
+            if (vacantes == null || vacantes <= 0) {
+                continue;
+            }
+
+            // SI HAY MENOS POSTULANTES QUE VACANTES
+            if (listaCarrera.size() <= vacantes) {
+                for (Examen examen : listaCarrera) {
+                    examen.setIngreso(true);
+                }
+                continue;
+            }
+
+            // OBTENER ÚLTIMA VACANTE
+            Examen examenUltimaVacante = listaCarrera.get(vacantes - 1);
+
+            Integer ultimoOrdenMerito = examenUltimaVacante.getOrdenMerito();
+
+            // INGRESAN TODOS LOS QUE TENGAN ESE ORDEN O MENOR
+            for (Examen examen : listaCarrera) {
+                if (examen.getOrdenMerito() <= ultimoOrdenMerito) {
+                    examen.setIngreso(true);
+                }
+            }
+        }
+
+        examenRepository.saveAll(examenes);
+    }
+
+    @Transactional
+    public void actualizarVacantes(
+            Long procesoId,
+            Map<String, String> vacantesMap
+    ) {
+        ProcesoAdmision proceso =
+                procesoAdmisionRepository
+                        .findById(procesoId)
+                        .orElseThrow();
+
+        List<Carrera> carreras = carreraRepository.findAll();
+
+        for (Carrera carrera : carreras) {
+            String key = "vacante_" + carrera.getId();
+
+            if (vacantesMap.containsKey(key)) {
+                Integer nuevasVacantes = Integer.parseInt(vacantesMap.get(key));
+
+                carrera.setVacantes(nuevasVacantes);
+
+                carreraRepository.save(carrera);
+            }
+        }
+        recalcularIngresantes(proceso);
     }
 }

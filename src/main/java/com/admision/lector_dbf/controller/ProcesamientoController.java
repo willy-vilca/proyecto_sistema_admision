@@ -1,8 +1,10 @@
 package com.admision.lector_dbf.controller;
 
+import com.admision.lector_dbf.entity.Carrera;
 import com.admision.lector_dbf.entity.Examen;
 import com.admision.lector_dbf.entity.ProcesoAdmision;
 import com.admision.lector_dbf.repository.ExamenRepository;
+import com.admision.lector_dbf.repository.CarreraRepository;
 import com.admision.lector_dbf.repository.ProcesoAdmisionRepository;
 import com.admision.lector_dbf.service.ProcesamientoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class ProcesamientoController {
@@ -24,6 +27,9 @@ public class ProcesamientoController {
 
     @Autowired
     private ExamenRepository examenRepository;
+
+    @Autowired
+    private CarreraRepository carreraRepository;
 
     @GetMapping("/")
     public String inicio(Model model) {
@@ -104,6 +110,14 @@ public class ProcesamientoController {
                 "examenes",
                 examenes
         );
+
+        List<Carrera> carreras =
+                carreraRepository.findAll();
+
+        model.addAttribute(
+                "carreras",
+                carreras
+        );
         return "proceso-detalle";
     }
 
@@ -121,7 +135,12 @@ public class ProcesamientoController {
 
         examen.setMotivoAnulacion(motivo);
 
+        examen.setOrdenMerito(null);
+
         examenRepository.save(examen);
+
+        procesamientoService.recalcularOrdenMerito(examen.getProcesoAdmision());
+        procesamientoService.recalcularIngresantes(examen.getProcesoAdmision());
 
         return "redirect:/proceso/"
                 + examen.getProcesoAdmision().getId();
@@ -141,6 +160,9 @@ public class ProcesamientoController {
         examen.setMotivoAnulacion(null);
 
         examenRepository.save(examen);
+
+        procesamientoService.recalcularOrdenMerito(examen.getProcesoAdmision());
+        procesamientoService.recalcularIngresantes(examen.getProcesoAdmision());
 
         return "redirect:/proceso/"
                 + examen.getProcesoAdmision().getId();
@@ -164,6 +186,20 @@ public class ProcesamientoController {
 
         return "redirect:/proceso/"
                 + examen.getProcesoAdmision().getId();
+    }
+
+    @PostMapping("/actualizar-vacantes")
+    public String actualizarVacantes(
+            @RequestParam Long procesoId,
+            @RequestParam Map<String, String> vacantesMap
+    ) {
+
+        procesamientoService.actualizarVacantes(
+                procesoId,
+                vacantesMap
+        );
+
+        return "redirect:/proceso/" + procesoId;
     }
 
 }

@@ -130,6 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 "ordenPuntaje"
             );
 
+        const filtroCarrera =
+            document.getElementById(
+                "filtroCarrera"
+            );
+
         const btnAnterior =
             document.getElementById(
                 "btnAnterior"
@@ -199,21 +204,44 @@ document.addEventListener("DOMContentLoaded", () => {
                 buscador.value
                     .toLowerCase();
 
+            const carreraSeleccionada =
+                filtroCarrera.value
+                    .toLowerCase();
+
             filasFiltradas =
                 filasOriginales.filter(fila => {
 
                     const codigo =
-                        fila.children[1]
+                        fila.children[2]
                             .textContent
                             .toLowerCase();
 
-                    return codigo.includes(
-                        textoBusqueda
-                    );
+                    const carrera =
+                        fila.children[0]
+                            .textContent
+                            .toLowerCase();
+
+                    const coincideCodigo =
+                        codigo.includes(
+                            textoBusqueda
+                        );
+
+                    const coincideCarrera =
+                        carreraSeleccionada === ""
+                        ||
+                        carrera.includes(
+                            carreraSeleccionada
+                        );
+
+                    return coincideCodigo
+                        &&
+                        coincideCarrera;
                 });
 
             ordenarTabla();
+
             paginaActual = 1;
+
             renderTabla();
         }
 
@@ -254,6 +282,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 ordenarTabla();
                 renderTabla();
             }
+        );
+
+        filtroCarrera.addEventListener(
+            "change",
+            aplicarFiltros
         );
 
         btnAnterior.addEventListener(

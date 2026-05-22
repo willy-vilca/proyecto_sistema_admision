@@ -5,12 +5,121 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Detalle proceso</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" th:href="@{/css/style.css}">
-    </head>
-    <body>
-        <div class="container-fluid py-4">
+        <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+        <style>
+            .detail-shell {
+                min-height: 100vh;
+                background:
+                    radial-gradient(circle at top left, rgba(33, 100, 108, 0.14), transparent 26%),
+                    radial-gradient(circle at top right, rgba(199, 155, 82, 0.18), transparent 22%),
+                    linear-gradient(180deg, #f7f2ea 0%, #efe7dc 100%);
+            }
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            .detail-wrap {
+                max-width: 1600px;
+                margin: 0 auto;
+            }
+
+            .detail-topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1.75rem;
+                padding: 2rem;
+                border-radius: 30px;
+                background: linear-gradient(135deg, #183a45, #235966);
+                color: #fff7ef;
+                box-shadow: 0 26px 60px rgba(20, 40, 48, 0.18);
+            }
+
+            .detail-topbar p {
+                margin-bottom: 0;
+                color: rgba(255, 247, 239, 0.78);
+                font-weight: 500;
+            }
+
+            .detail-topbar h1 {
+                margin-bottom: 0.4rem;
+                font-size: clamp(2rem, 3vw, 3rem);
+                letter-spacing: -0.04em;
+            }
+
+            .detail-panel {
+                border: 0;
+                border-radius: 26px;
+                background: rgba(255, 251, 245, 0.92);
+                box-shadow: 0 18px 45px rgba(23, 48, 58, 0.12);
+            }
+
+            .detail-panel .card-body {
+                padding: 1.4rem;
+            }
+
+            .filter-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 1rem;
+            }
+
+            .filter-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.45rem;
+            }
+
+            .filter-item label {
+                font-size: 0.88rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: #39545e;
+            }
+
+            .detail-table-wrap {
+                padding: 1rem;
+                border-radius: 30px;
+                background: rgba(255, 255, 255, 0.58);
+                box-shadow: 0 20px 48px rgba(23, 48, 58, 0.08);
+            }
+
+            .detail-table-wrap table {
+                margin-bottom: 0;
+                overflow: hidden;
+                border-radius: 22px;
+                background: rgba(255, 255, 255, 0.94);
+            }
+
+            .detail-table-wrap thead th {
+                border-bottom: 0;
+            }
+
+            .detail-pager {
+                margin-top: 1.2rem;
+                padding: 1rem 1.2rem;
+                border-radius: 22px;
+                background: rgba(255, 251, 245, 0.85);
+            }
+
+            @media (max-width: 992px) {
+                .filter-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .detail-topbar {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 1.4rem;
+                }
+            }
+        </style>
+    </head>
+    <body class="detail-shell">
+        <div class="container-fluid py-4 detail-wrap">
+
+            <div class="d-flex justify-content-between align-items-center mb-4 detail-topbar">
 
                 <div>
                     <h1 class="fw-bold"
@@ -22,21 +131,38 @@
                     </p>
                 </div>
 
-                <a href="/"
-                   class="btn btn-secondary">
-                    Volver
-                </a>
-            </div>
-            <div class="card shadow-sm border-0 mb-4">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVacantes">
+                        Gestionar Vacantes
+                    </button>
 
-                <div class="card-body d-flex gap-3 flex-wrap">
+                    <a href="/" class="btn btn-secondary">
+                        Volver
+                    </a>
+                </div>
+            </div>
+            <div class="card shadow-sm border-0 mb-4 detail-panel">
+
+                <div class="card-body">
+
+                    <div class="filter-grid">
+
+                    <div class="filter-item">
+                    <label for="buscadorCodigo">
+                        Buscar por código
+                    </label>
 
                     <input type="text"
                            class="form-control"
                            placeholder="Buscar por código"
                            id="buscadorCodigo"
                            style="max-width: 300px;">
+                    </div>
 
+                    <div class="filter-item">
+                    <label for="ordenPuntaje">
+                        Ordenar puntaje
+                    </label>
                     <select class="form-select"
                             id="ordenPuntaje"
                             style="max-width: 250px;">
@@ -49,10 +175,32 @@
                             Menor a mayor
                         </option>
                     </select>
+                    </div>
+
+                    <div class="filter-item">
+                    <label for="filtroCarrera">
+                        Filtrar carrera
+                    </label>
+                    <select class="form-select shadow-sm"
+                            id="filtroCarrera"
+                            style="max-width: 350px;">
+
+                        <option value="">
+                            Todas las carreras
+                        </option>
+
+                        <option th:each="carrera : ${carreras}"
+                                th:value="${carrera.nombre}"
+                                th:text="${carrera.nombre}">
+                        </option>
+
+                    </select>
+                    </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive detail-table-wrap">
 
                 <table class="table table-hover align-middle"
                        id="tablaExamenes">
@@ -60,6 +208,7 @@
                     <thead class="table-dark">
                     <tr>
                         <th>Carrera</th>
+                        <th>Puesto</th>
                         <th>Código</th>
                         <th>Nombre</th>
                         <th>Correctas</th>
@@ -78,6 +227,8 @@
 
                         <td th:text="${examen.alumno.carrera.nombre}"></td>
 
+                        <td th:text="${examen.ordenMerito}"></td>
+
                         <td th:text="${examen.alumno.codigo}"></td>
 
                         <td th:text="${examen.alumno.nombres}"></td>
@@ -93,7 +244,13 @@
                         </td>
 
                         <td>
-                            No definido
+                            <span th:if="${examen.ingreso}" class="badge bg-success">
+                                Ingresó
+                            </span>
+
+                            <span th:unless="${examen.ingreso}" class="badge bg-danger">
+                                No ingresó
+                            </span>
                         </td>
 
                         <td>
@@ -140,7 +297,7 @@
                     </tbody>
                 </table>
                 <!-- Botones de Paginacion -->
-                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 mt-4">
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 mt-4 detail-pager">
                     <div class="text-muted"
                          id="infoPaginacion">
                         Página 1 de 1
@@ -271,6 +428,72 @@
                             </form>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para gestionar la cantidad de vacantes -->
+        <div class="modal fade" id="modalVacantes" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+
+                    <form method="post" action="/actualizar-vacantes">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">
+                                Gestión de Vacantes
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="procesoId" th:value="${proceso.id}">
+
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Carrera</th>
+                                            <th style="width: 180px;">
+                                                Vacantes
+                                            </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr th:each="carrera : ${carreras}">
+
+                                            <td th:text="${carrera.nombre}">
+                                            </td>
+
+                                            <td>
+
+                                                <input type="number"
+                                                       min="0"
+                                                       class="form-control"
+                                                       th:name="${'vacante_' + carrera.id}"
+                                                       th:value="${carrera.vacantes}">
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+
+                            <button class="btn btn-primary">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

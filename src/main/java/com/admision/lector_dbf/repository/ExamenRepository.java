@@ -22,4 +22,17 @@ public interface ExamenRepository
             @Param("proceso")
             ProcesoAdmision proceso
     );
+
+    List<Examen> findByProcesoAdmisionAndAnuladoFalse(
+            ProcesoAdmision proceso
+    );
+
+    List<Examen> findByProcesoAdmision(
+            ProcesoAdmision proceso
+    );
+
+    List<Examen> findByProcesoAdmisionIdAndAlumnoCarreraIdOrderByOrdenMeritoAsc(
+            Long procesoId,
+            Long carreraId
+    );
 }
