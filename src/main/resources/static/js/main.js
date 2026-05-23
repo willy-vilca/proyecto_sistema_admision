@@ -98,6 +98,38 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // REVISIÓN DE EXAMENES
+    document.querySelectorAll(
+        ".btn-mostrar-anulacion"
+    ).forEach(btn => {
+
+        btn.addEventListener(
+            "click",
+            () => {
+                const modalBody =
+                    btn.closest(".modal-body");
+                modalBody.querySelector(
+                    ".revision-anulacion-panel"
+                ).classList.remove("d-none");
+            }
+        );
+    });
+
+    document.querySelectorAll(
+        ".btn-cancelar-anulacion"
+    ).forEach(btn => {
+        btn.addEventListener(
+            "click",
+            () => {
+                const panel =
+                    btn.closest(
+                        ".revision-anulacion-panel"
+                    );
+                panel.classList.add("d-none");
+            }
+        );
+    });
+
     // TABLA CON PAGINACION DINAMICA
     const tabla = document.getElementById(
         "tablaExamenes"
@@ -133,6 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const filtroCarrera =
             document.getElementById(
                 "filtroCarrera"
+            );
+
+        const filtroEstado =
+            document.getElementById(
+                "filtroEstado"
             );
 
         const btnAnterior =
@@ -208,6 +245,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 filtroCarrera.value
                     .toLowerCase();
 
+            const estadoSeleccionado =
+                filtroEstado.value;
+
             filasFiltradas =
                 filasOriginales.filter(fila => {
 
@@ -221,6 +261,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             .textContent
                             .toLowerCase();
 
+                    const anulado =
+                        fila.dataset.anulado === "true";
+
+                    const revision =
+                        fila.dataset.revision === "true";
+
                     const coincideCodigo =
                         codigo.includes(
                             textoBusqueda
@@ -233,15 +279,30 @@ document.addEventListener("DOMContentLoaded", () => {
                             carreraSeleccionada
                         );
 
+                    let coincideEstado = true;
+
+                    if (estadoSeleccionado === "valido") {
+                        coincideEstado =
+                            !anulado && !revision;
+                    }
+                    else if (estadoSeleccionado === "anulado") {
+                        coincideEstado =
+                            anulado && !revision;
+                    }
+                    else if (estadoSeleccionado === "revision") {
+                        coincideEstado =
+                            revision;
+                    }
+
                     return coincideCodigo
                         &&
-                        coincideCarrera;
+                        coincideCarrera
+                        &&
+                        coincideEstado;
                 });
 
             ordenarTabla();
-
             paginaActual = 1;
-
             renderTabla();
         }
 
@@ -285,6 +346,11 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         filtroCarrera.addEventListener(
+            "change",
+            aplicarFiltros
+        );
+
+        filtroEstado.addEventListener(
             "change",
             aplicarFiltros
         );

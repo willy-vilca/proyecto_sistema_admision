@@ -384,6 +384,95 @@ p {
     text-decoration: none;
 }
 
+.bg-warning {
+    background: linear-gradient(135deg, #f0c24b, #d69a1d) !important;
+}
+
+.modal-revision-header {
+    background: linear-gradient(135deg, #d7a633, #b98212);
+    color: white;
+}
+
+.detalle-revision-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.15rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.detalle-revision-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(1.08);
+    color: white;
+}
+
+.revision-alert {
+    display: flex;
+    gap: 1rem;
+    padding: 1.2rem;
+    border-radius: 20px;
+    background: rgba(214, 154, 29, 0.12);
+    border: 1px solid rgba(214, 154, 29, 0.2);
+}
+
+.revision-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e6b23f, #c98b15);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.revision-info-card {
+    padding: 1rem 1.2rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(23, 49, 59, 0.08);
+}
+
+.revision-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #7b5a11;
+    margin-bottom: 0.35rem;
+}
+
+.revision-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #17313b;
+}
+
+.revision-help-text {
+    padding: 1rem 1.2rem;
+    border-radius: 18px;
+    background: rgba(255, 248, 235, 0.82);
+}
+
+.revision-anulacion-panel {
+    padding: 1.2rem;
+    border-radius: 20px;
+    background: rgba(180, 79, 67, 0.08);
+    border: 1px solid rgba(180, 79, 67, 0.15);
+}
+
 @media (max-width: 768px) {
     .hero-section .container,
     .container-fluid {

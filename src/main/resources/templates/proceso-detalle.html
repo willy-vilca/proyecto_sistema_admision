@@ -58,7 +58,7 @@
 
             .filter-grid {
                 display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 1rem;
             }
 
@@ -147,55 +147,77 @@
 
                     <div class="filter-grid">
 
-                    <div class="filter-item">
-                    <label for="buscadorCodigo">
-                        Buscar por código
-                    </label>
+                        <div class="filter-item">
+                            <label for="buscadorCodigo">
+                                Buscar por código
+                            </label>
 
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Buscar por código"
-                           id="buscadorCodigo"
-                           style="max-width: 300px;">
-                    </div>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Buscar por código"
+                                   id="buscadorCodigo"
+                                   style="max-width: 300px;">
+                        </div>
 
-                    <div class="filter-item">
-                    <label for="ordenPuntaje">
-                        Ordenar puntaje
-                    </label>
-                    <select class="form-select"
-                            id="ordenPuntaje"
-                            style="max-width: 250px;">
+                        <div class="filter-item">
+                            <label for="ordenPuntaje">
+                                Ordenar puntaje
+                            </label>
+                            <select class="form-select"
+                                    id="ordenPuntaje"
+                                    style="max-width: 250px;">
 
-                        <option value="desc">
-                            Mayor a menor
-                        </option>
+                                <option value="desc">
+                                    Mayor a menor
+                                </option>
 
-                        <option value="asc">
-                            Menor a mayor
-                        </option>
-                    </select>
-                    </div>
+                                <option value="asc">
+                                    Menor a mayor
+                                </option>
+                            </select>
+                        </div>
 
-                    <div class="filter-item">
-                    <label for="filtroCarrera">
-                        Filtrar carrera
-                    </label>
-                    <select class="form-select shadow-sm"
-                            id="filtroCarrera"
-                            style="max-width: 350px;">
+                        <div class="filter-item">
+                            <label for="filtroCarrera">
+                                Filtrar carrera
+                            </label>
+                            <select class="form-select shadow-sm"
+                                    id="filtroCarrera"
+                                    style="max-width: 350px;">
 
-                        <option value="">
-                            Todas las carreras
-                        </option>
+                                <option value="">
+                                    Todas las carreras
+                                </option>
 
-                        <option th:each="carrera : ${carreras}"
-                                th:value="${carrera.nombre}"
-                                th:text="${carrera.nombre}">
-                        </option>
+                                <option th:each="carrera : ${carreras}"
+                                        th:value="${carrera.nombre}"
+                                        th:text="${carrera.nombre}">
+                                </option>
 
-                    </select>
-                    </div>
+                            </select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label for="filtroEstado">
+                                Filtrar estado
+                            </label>
+                            <select class="form-select shadow-sm"
+                                    id="filtroEstado"
+                                    style="max-width: 300px;">
+                                <option value="">
+                                    Todos
+                                </option>
+                                <option value="valido">
+                                    Válidos
+                                </option>
+                                <option value="anulado">
+                                    Anulados
+                                </option>
+                                <option value="revision">
+                                    En revisión
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,78 +244,101 @@
                     </thead>
 
                     <tbody>
-                    <tr th:each="examen : ${examenes}"
-                        th:classappend="${examen.anulado} ? 'table-danger' : ''">
+                        <tr th:each="examen : ${examenes}"
+                        th:with="enRevision=${examen.anulado and examen.motivoAnulacion == 'El estudiante no indicó el tema en la hoja de respuestas'}"
+                        th:classappend="${examen.anulado and !enRevision} ? 'table-danger' : (${enRevision} ? 'table-warning' : '')"
+                        th:attr="
+                             data-anulado=${examen.anulado},
+                             data-revision=${examen.motivoAnulacion == 'El estudiante no indicó el tema en la hoja de respuestas'}
+                            ">
 
-                        <td th:text="${examen.alumno.carrera.nombre}"></td>
+                            <td th:text="${examen.alumno.carrera.nombre}"></td>
 
-                        <td th:text="${examen.ordenMerito}"></td>
+                            <td th:text="${examen.ordenMerito}"></td>
 
-                        <td th:text="${examen.alumno.codigo}"></td>
+                            <td th:text="${examen.alumno.codigo}"></td>
 
-                        <td th:text="${examen.alumno.nombres}"></td>
+                            <td th:text="${examen.alumno.nombres}"></td>
 
-                        <td th:text="${examen.correctas}"></td>
+                            <td th:text="${examen.correctas}"></td>
 
-                        <td th:text="${examen.incorrectas}"></td>
+                            <td th:text="${examen.incorrectas}"></td>
 
-                        <td th:text="${examen.blancas}"></td>
+                            <td th:text="${examen.blancas}"></td>
 
-                        <td class="puntaje"
-                            th:text="${examen.puntaje}">
-                        </td>
+                            <td class="puntaje"
+                                th:text="${examen.puntaje}">
+                            </td>
 
-                        <td>
-                            <span th:if="${examen.ingreso}" class="badge bg-success">
-                                Ingresó
-                            </span>
+                            <td>
+                                <span th:if="${examen.ingreso}" class="badge bg-success">
+                                    Ingresó
+                                </span>
 
-                            <span th:unless="${examen.ingreso}" class="badge bg-danger">
-                                No ingresó
-                            </span>
-                        </td>
+                                <span th:unless="${examen.ingreso}" class="badge bg-danger">
+                                    No ingresó
+                                </span>
+                            </td>
 
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <span th:if="${examen.anulado}" class="badge bg-danger d-flex align-items-center gap-1">
-                                    ANULADO
-                                    <button type="button"
-                                            class="btn btn-light btn-sm detalle-anulacion-btn"
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- EN REVISION -->
+                                    <span th:if="${enRevision}"
+                                          class="badge bg-warning text-dark d-flex align-items-center gap-1">
+                                        EN REVISIÓN
+                                        <button type="button"
+                                                class="btn btn-light btn-sm detalle-revision-btn"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="${'#modalRevision' + examen.id}">
+                                            ⓘ
+                                        </button>
+                                    </span>
+
+                                    <!-- ANULADO -->
+                                    <span th:if="${examen.anulado and !enRevision}"
+                                          class="badge bg-danger d-flex align-items-center gap-1">
+                                        ANULADO
+                                        <button type="button"
+                                                class="btn btn-light btn-sm detalle-anulacion-btn"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="${'#modalDetalleAnulacion' + examen.id}">
+
+                                            ⓘ
+                                        </button>
+                                    </span>
+
+                                    <!-- VALIDO -->
+                                    <span th:if="${!examen.anulado}" class="badge bg-success">
+                                        VÁLIDO
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <!-- EN REVISION -->
+                                <div th:if="${enRevision}">
+                                </div>
+
+                                <!-- VALIDO -->
+                                <div th:if="${!examen.anulado and !enRevision}">
+                                    <button class="btn btn-outline-danger btn-sm"
                                             data-bs-toggle="modal"
-                                            th:data-bs-target="${'#modalDetalleAnulacion' + examen.id}">
-                                        ⓘ
+                                            th:data-bs-target="${'#modalAnular' + examen.id}">
+                                        Anular
                                     </button>
-                                </span>
+                                </div>
 
-                                <span th:unless="${examen.anulado}" class="badge bg-success">
-                                    VÁLIDO
-                                </span>
-                            </div>
-                        </td>
-
-                        <td>
-
-                            <div th:if="${!examen.anulado}">
-
-                                <button class="btn btn-outline-danger btn-sm"
-                                        data-bs-toggle="modal"
-                                        th:data-bs-target="${'#modalAnular' + examen.id}">
-                                    Anular
-                                </button>
-                            </div>
-
-                            <div th:if="${examen.anulado}">
-
-                                <form method="post"
-                                      th:action="@{'/desanular/' + ${examen.id}}">
-
-                                    <button class="btn btn-outline-success btn-sm">
-                                        Desanular
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+                                <!-- ANULADO -->
+                                <div th:if="${examen.anulado and !enRevision}">
+                                    <form method="post"
+                                          th:action="@{'/desanular/' + ${examen.id}}">
+                                        <button class="btn btn-outline-success btn-sm">
+                                            Desanular
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <!-- Botones de Paginacion -->
@@ -426,6 +471,118 @@
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para examen en revision -->
+        <div th:each="examen : ${examenes}">
+            <div class="modal fade"
+                 th:id="${'modalRevision' + examen.id}"
+                 tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header modal-revision-header">
+                            <div>
+                                <h5 class="modal-title fw-bold mb-1">
+                                    Examen en revisión
+                                </h5>
+                                <small class="text-white-50">
+                                    Validación de inconsistencias en tema
+                                </small>
+                            </div>
+                            <button type="button"
+                                    class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="revision-alert mb-4">
+                                <div class="revision-icon">
+                                    ⚠
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">
+                                        El estudiante no indicó el tema en la hoja de respuestas
+                                    </h6>
+                                    <p class="mb-0">
+                                        El sistema calificó el examen utilizando el tema registrado en la hoja de Identificación.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="revision-info-card mb-4">
+                                <div class="revision-label">
+                                    Tema detectado en Identificación
+                                </div>
+                                <div class="revision-value"
+                                     th:text="${examen.tema}">
+                                </div>
+                            </div>
+
+                            <div class="revision-help-text">
+                                <p class="mb-2 fw-bold">
+                                    Opciones disponibles:
+                                </p>
+                                <ul class="mb-0">
+                                    <li>
+                                        Validar el examen y aceptar el tema de la hoja de Identificación.
+                                    </li>
+                                    <li>
+                                        Mantener el examen anulado por inconsistencia de datos.
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- FORM VALIDAR -->
+                            <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+                                <form method="post"
+                                      th:action="@{'/desanular/' + ${examen.id}}">
+                                    <button class="btn btn-success">
+                                        Validar examen
+                                    </button>
+                                </form>
+
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-mostrar-anulacion">
+                                    Anular examen
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+                            </div>
+
+                            <!-- PANEL ANULACION -->
+                            <div class="revision-anulacion-panel d-none mt-4">
+                                <form method="post"
+                                      th:action="@{'/actualizar-motivo/' + ${examen.id}}">
+
+                                    <label class="form-label fw-bold">
+                                        Motivo definitivo de anulación
+                                    </label>
+                                    <textarea class="form-control"
+                                              rows="4"
+                                              name="motivo"
+                                              th:text="${examen.motivoAnulacion+'.'}">
+                                    </textarea>
+
+                                    <div class="d-flex gap-2 justify-content-end mt-3">
+                                        <button type="button"
+                                                class="btn btn-secondary btn-cancelar-anulacion">
+                                            Cancelar
+                                        </button>
+                                        <button class="btn btn-danger">
+                                            Confirmar anulación
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
