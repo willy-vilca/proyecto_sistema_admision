@@ -108,6 +108,16 @@ public class ProcesamientoService {
                     identifi.getTema()
             );
 
+            //validaciones
+            String temaIdentifi = identifi.getTema();
+            String temaRespuest = respuesta.getTema();
+            boolean temaRespuestVacio = temaRespuest == null || temaRespuest.trim().isEmpty();
+            boolean temaDiferente =
+                    !temaRespuestVacio
+                            && !temaIdentifi.equalsIgnoreCase(
+                            temaRespuest
+                    );
+
             examen.setCorrectas(0);
             examen.setIncorrectas(0);
             examen.setBlancas(0);
@@ -125,39 +135,20 @@ public class ProcesamientoService {
                     respuestasJson
             );
 
-            Map<String, String> claveTema =
-                    claves.get(
-                            respuesta.getTema()
-                    );
+            Map<String, String> claveTema = claves.get(
+                    identifi.getTema()
+            );
 
             if (claveTema == null) {
-
-                claveTema =
-                        claves.get(
-                                identifi.getTema()
-                        );
-            }
-
-            if (claveTema == null) {
-
                 examen.setAnulado(true);
-
                 examen.setMotivoAnulacion(
                         "El alumno no digitó el tema del examen"
                 );
-
                 examen.setCorrectas(0);
-
                 examen.setIncorrectas(0);
-
                 examen.setBlancas(0);
-
                 examen.setPuntaje(0.0);
-
             } else {
-
-                examen.setAnulado(false);
-
                 calificarExamen(
                         examen,
                         respuesta.getRespuestas(),
@@ -166,6 +157,22 @@ public class ProcesamientoService {
                         puntajeIncorrecta,
                         puntajeBlanca
                 );
+
+                // VALIDAR INCONSISTENCIAS
+                if (temaRespuestVacio) {
+                    examen.setAnulado(true);
+                    examen.setMotivoAnulacion(
+                            "El estudiante no indicó el tema en la hoja de respuestas"
+                    );
+                } else if (temaDiferente) {
+                    examen.setAnulado(true);
+                    examen.setMotivoAnulacion(
+                            "El tema de respuestas no coincide con el tema de identificación"
+                    );
+                } else {
+                    examen.setAnulado(false);
+                    examen.setMotivoAnulacion(null);
+                }
             }
 
             examenRepository.save(examen);
