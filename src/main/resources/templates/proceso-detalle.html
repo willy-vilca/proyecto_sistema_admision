@@ -386,6 +386,7 @@
                     <div class="modal-content">
 
                         <form method="post"
+                              enctype="multipart/form-data"
                               th:action="@{'/anular/' + ${examen.id}}">
 
                             <div class="modal-header">
@@ -409,6 +410,21 @@
                                           name="motivo"
                                           required>
                                 </textarea>
+
+                                <div class="mt-4">
+                                    <label class="form-label">
+                                        Evidencias de anulación
+                                    </label>
+                                    <input type="file"
+                                           class="form-control evidencia-input"
+                                           name="imagenes"
+                                           multiple
+                                           accept="image/*">
+                                    <div class="form-text mt-2">
+                                        Puedes subir múltiples imágenes como evidencia.
+                                    </div>
+                                    <div class="preview-evidencias mt-3 d-flex flex-wrap gap-3"></div>
+                                </div>
                             </div>
                             <div class="modal-footer">
 
@@ -479,6 +495,72 @@
                                     </button>
                                 </div>
                             </form>
+
+                            <div class="mt-4">
+                                <label class="form-label fw-bold">
+                                    Evidencias registradas
+                                </label>
+
+                                <div class="evidencia-grid">
+                                    <div class="evidencia-card"
+                                         th:each="evidencia : ${examen.evidencias}">
+
+                                        <a th:href="@{'/evidencia/' + ${evidencia.id}}"
+                                           target="_blank">
+                                            <img class="evidencia-img"
+                                                 th:src="@{'/evidencia/' + ${evidencia.id}}">
+                                        </a>
+
+                                        <div class="evidencia-info">
+                                            <div class="evidencia-nombre"
+                                                 th:text="${evidencia.nombreOriginal}">
+                                            </div>
+                                            <div class="evidencia-fecha"
+                                                 th:text="${#temporals.format(evidencia.fechaSubida,'dd/MM/yyyy HH:mm')}">
+                                            </div>
+                                        </div>
+
+                                        <div class="evidencia-actions">
+                                            <a class="btn btn-outline-primary btn-sm"
+                                               th:href="@{'/evidencia/' + ${evidencia.id}}"
+                                               target="_blank">
+                                                Ver
+                                            </a>
+
+                                            <form method="post"
+                                                  th:action="@{'/evidencia/eliminar/' + ${evidencia.id}}">
+                                                <button class="btn btn-outline-danger btn-sm">
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+
+                                <form method="post"
+                                      enctype="multipart/form-data"
+                                      th:action="@{'/evidencia/agregar/' + ${examen.id}}">
+
+                                    <label class="form-label fw-bold">
+                                        Agregar nuevas evidencias
+                                    </label>
+
+                                    <input type="file"
+                                           class="form-control"
+                                           name="imagenes"
+                                           multiple
+                                           accept="image/*">
+
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <button class="btn btn-primary">
+                                            Subir imágenes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

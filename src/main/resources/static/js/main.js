@@ -414,4 +414,48 @@ document.addEventListener("DOMContentLoaded", () => {
         ordenarTabla();
         renderTabla();
     }
+
+    // PREVIEW DE EVIDENCIAS
+    document.querySelectorAll(
+        ".evidencia-input"
+    ).forEach(input => {
+
+        input.addEventListener(
+            "change",
+            function () {
+                const previewContainer =
+                    this.closest(".modal-body")
+                        .querySelector(
+                            ".preview-evidencias"
+                        );
+
+                previewContainer.innerHTML = "";
+
+                Array.from(this.files)
+                    .forEach(file => {
+
+                        const reader =
+                            new FileReader();
+
+                        reader.onload = e => {
+
+                            const wrapper = document.createElement("div");
+                            wrapper.classList.add("preview-card");
+
+                            wrapper.innerHTML = `
+                            <img src="${e.target.result}"
+                                 class="preview-img">
+                            <div class="preview-name">
+                                ${file.name}
+                            </div>
+                        `;
+
+                            previewContainer.appendChild(wrapper);
+                        };
+
+                        reader.readAsDataURL(file);
+                    });
+            }
+        );
+    });
 });

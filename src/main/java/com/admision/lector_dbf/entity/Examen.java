@@ -5,6 +5,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "examenes")
 public class Examen {
@@ -46,6 +49,13 @@ public class Examen {
     @ManyToOne
     @JoinColumn(name = "proceso_id")
     private ProcesoAdmision procesoAdmision;
+
+    @OneToMany(
+            mappedBy = "examen",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<EvidenciaAnulacion> evidencias = new ArrayList<>();
 
     public Examen() {
     }
@@ -167,5 +177,13 @@ public class Examen {
 
     public void setIngreso(Boolean ingreso) {
         this.ingreso = ingreso;
+    }
+
+    public List<EvidenciaAnulacion> getEvidencias() {
+        return evidencias;
+    }
+
+    public void setEvidencias(List<EvidenciaAnulacion> evidencias) {
+        this.evidencias = evidencias;
     }
 }
