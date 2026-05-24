@@ -188,6 +188,27 @@ p {
     border-color: transparent !important;
 }
 
+.btn-pdf {
+    background: linear-gradient(135deg, #b44f43, #8e342a);
+    color: #fff;
+    border: none;
+    box-shadow: 0 12px 24px rgba(180, 79, 67, 0.22);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.btn-pdf:hover {
+    background: linear-gradient(135deg, #a5473d, #7d2c24) !important;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.pdf-icon {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
 .btn-outline-secondary,
 .btn-secondary {
     border-color: rgba(23, 49, 59, 0.12);

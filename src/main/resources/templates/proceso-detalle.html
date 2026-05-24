@@ -131,7 +131,15 @@
                     </p>
                 </div>
 
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a th:href="@{'/pdf/resultados/' + ${proceso.id}}"
+                       class="btn btn-pdf"
+                       target="_blank">
+                        <span class="pdf-icon">
+                            ⬇
+                        </span>
+                        Descargar PDF
+                    </a>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVacantes">
                         Gestionar Vacantes
                     </button>
