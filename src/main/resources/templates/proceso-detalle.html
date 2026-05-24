@@ -338,12 +338,11 @@
 
                                 <!-- ANULADO -->
                                 <div th:if="${examen.anulado and !enRevision}">
-                                    <form method="post"
-                                          th:action="@{'/desanular/' + ${examen.id}}">
-                                        <button class="btn btn-outline-success btn-sm">
-                                            Desanular
-                                        </button>
-                                    </form>
+                                    <button class="btn btn-outline-success btn-sm"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="${'#modalDesanular' + examen.id}">
+                                        Desanular
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -561,6 +560,60 @@
                                     </div>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para confirmar desanulación -->
+        <div th:each="examen : ${examenes}">
+            <div class="modal fade"
+                 th:id="${'modalDesanular' + examen.id}"
+                 tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title fw-bold">
+                                Confirmar desanulación
+                            </h5>
+                            <button type="button"
+                                    class="btn-close btn-close-white"
+                                    data-bs-dismiss="modal">
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="desanular-warning">
+                                <div class="desanular-icon">
+                                    ⚠
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-2">
+                                        El examen volverá a estar válido
+                                    </h6>
+                                    <p class="mb-0">
+                                        Al desanular este examen se eliminarán
+                                        todas las evidencias asociadas y el examen
+                                        volverá a participar en el orden de mérito
+                                        y cálculo de ingresantes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <form method="post"
+                                  th:action="@{'/desanular/' + ${examen.id}}">
+                                <button class="btn btn-success">
+                                    Confirmar desanulación
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

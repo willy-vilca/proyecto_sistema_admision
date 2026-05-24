@@ -574,6 +574,29 @@ p {
     padding: 0 1rem 1rem;
 }
 
+.desanular-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(47, 143, 102, 0.12), rgba(34, 99, 73, 0.08));
+    border: 1px solid rgba(47, 143, 102, 0.16);
+}
+
+.desanular-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    background: rgba(47, 143, 102, 0.14);
+    color: #226349;
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
     .hero-section .container,
     .container-fluid {

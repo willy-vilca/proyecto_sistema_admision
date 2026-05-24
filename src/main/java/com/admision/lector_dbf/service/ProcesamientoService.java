@@ -454,8 +454,7 @@ public class ProcesamientoService {
                     ).reversed()
             );
 
-            int posicionReal = 1;
-            int ordenActual = 1;
+            int ordenActual = 0;
             Double puntajeAnterior = null;
 
             for (Examen examen : listaCarrera) {
@@ -464,13 +463,12 @@ public class ProcesamientoService {
                             ordenActual
                     );
                 } else {
-                    ordenActual = posicionReal;
+                    ordenActual++;
                     examen.setOrdenMerito(
                             ordenActual
                     );
                 }
                 puntajeAnterior = examen.getPuntaje();
-                posicionReal++;
             }
         }
 

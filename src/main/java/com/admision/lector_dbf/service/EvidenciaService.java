@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -96,5 +97,25 @@ public class EvidenciaService {
         evidenciaRepository.delete(evidencia);
 
         return procesoId;
+    }
+
+    @Transactional
+    public void eliminarTodasLasEvidenciasDeExamen(
+            Examen examen
+    ) throws Exception {
+
+        List<EvidenciaAnulacion> evidencias =
+                evidenciaRepository
+                        .findByExamen(examen);
+
+        for (EvidenciaAnulacion evidencia : evidencias) {
+            Path path =
+                    Paths.get(
+                            evidencia.getRutaArchivo()
+                    );
+            Files.deleteIfExists(path);
+        }
+
+        evidenciaRepository.deleteAll(evidencias);
     }
 }

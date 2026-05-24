@@ -181,11 +181,14 @@ public class ProcesamientoController {
     @PostMapping("/desanular/{id}")
     public String desanularExamen(
             @PathVariable Long id
-    ) {
+    ) throws Exception {
         Examen examen =
                 examenRepository
                         .findById(id)
                         .orElseThrow();
+
+        // eliminar evidencias
+        evidenciaService.eliminarTodasLasEvidenciasDeExamen(examen);
 
         examen.setAnulado(false);
 
