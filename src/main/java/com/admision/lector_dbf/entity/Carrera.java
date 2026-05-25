@@ -12,6 +12,8 @@ public class Carrera {
 
     private String nombre;
 
+    private String facultad;
+
     private Integer vacantes;
 
     public Carrera() {
@@ -27,6 +29,14 @@ public class Carrera {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getfacultad() {
+        return facultad;
+    }
+
+    public void setfacultad(String facultad) {
+        this.facultad = facultad;
     }
 
     public Integer getVacantes() {

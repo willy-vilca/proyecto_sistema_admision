@@ -35,12 +35,26 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
 
     @Override
     public ByteArrayInputStream generarPdfResultados(Long procesoId) {
-        Document document = new Document(PageSize.A4, 20, 20, 30, 30);
+        Document document = new Document(PageSize.A4, 20, 20, 170, 80);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
 
             PdfWriter writer = PdfWriter.getInstance(document, out);
-            writer.setPageEvent(new FooterPageEvent());
+            HeaderPageEvent headerEvent =
+                    new HeaderPageEvent();
+
+            writer.setPageEvent(new PdfPageEventHelper() {
+                FooterPageEvent footerEvent = new FooterPageEvent();
+
+                @Override
+                public void onEndPage(
+                        PdfWriter writer,
+                        Document document
+                ) {
+                    headerEvent.onEndPage(writer, document);
+                    footerEvent.onEndPage(writer, document);
+                }
+            });
             document.open();
 
             List<Carrera> carreras = carreraRepository.findAll();
@@ -55,7 +69,7 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
                     continue;
                 }
 
-                agregarEncabezado(document, carrera);
+                headerEvent.setCarrera(carrera);
                 agregarTabla(document, examenes);
                 document.newPage();
             }
@@ -68,61 +82,6 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    private void agregarEncabezado(Document document, Carrera carrera)
-            throws Exception {
-
-        Font tituloFont = new Font(Font.HELVETICA, 18, Font.BOLD);
-        Font normal = new Font(Font.HELVETICA, 12, Font.BOLD);
-
-        Paragraph universidad = new Paragraph(
-                "UNIVERSIDAD NACIONAL \"SAN LUIS GONZAGA\"",
-                normal
-        );
-
-        universidad.setAlignment(Element.ALIGN_LEFT);
-
-        document.add(universidad);
-
-        document.add(new Paragraph(
-                "COMISION EJECUTIVA CENTRAL DE ADMISION CEPU 2023",
-                new Font(Font.HELVETICA, 10)
-        ));
-
-        document.add(new Paragraph(
-                "EXAMEN DE ADMISION CEPU 2023 - I",
-                new Font(Font.HELVETICA, 10)
-        ));
-
-        document.add(Chunk.NEWLINE);
-
-        Paragraph titulo = new Paragraph(
-                "RESULTADOS POR CARRERA PROFESIONAL",
-                tituloFont
-        );
-
-        titulo.setAlignment(Element.ALIGN_CENTER);
-
-        document.add(titulo);
-
-        document.add(Chunk.NEWLINE);
-
-        document.add(new Paragraph(
-                "Modalidad: CENTRO DE ESTUDIOS PREUNIVERSITARIOS",
-                normal
-        ));
-
-        document.add(new Paragraph(
-                "Facultad: " + carrera.getNombre(),
-                normal
-        ));
-
-        document.add(new Paragraph(
-                "Carrera Profesional: " + carrera.getNombre(),
-                normal
-        ));
-
-        document.add(Chunk.NEWLINE);
-    }
 
     private void agregarTabla(Document document, List<Examen> examenes)
             throws Exception {
@@ -170,9 +129,15 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
                     df.format(examen.getPuntaje()),
                     bg);
 
-            agregarCelda(table,
-                    String.format("%03d", examen.getOrdenMerito()),
-                    bg);
+            if(examen.getAnulado()){
+                agregarCelda(table,
+                        "",
+                        bg);
+            }else{
+                agregarCelda(table,
+                        String.format("%03d", examen.getOrdenMerito()),
+                        bg);
+            }
 
             agregarCelda(table,
                     obtenerCondicion(examen),
@@ -247,6 +212,9 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
 
         if (examen.getPuntaje() == 0) {
             return "AUSENTE";
+        }
+        if(examen.getAnulado()){
+            return "ANULADO";
         }
         return examen.getIngreso()
                 ? "INGRESO"
@@ -446,6 +414,129 @@ public class PdfResultadoServiceImpl implements PdfResultadoService {
             cell.setPaddingTop(8);
             cell.setPaddingBottom(8);
             return cell;
+        }
+    }
+
+    private static class HeaderPageEvent extends PdfPageEventHelper {
+
+        private Carrera carrera;
+        public void setCarrera(Carrera carrera) {
+            this.carrera = carrera;
+        }
+
+        @Override
+        public void onEndPage(PdfWriter writer, Document document) {
+
+            if (carrera == null) {
+                return;
+            }
+
+            try {
+                PdfPTable header = new PdfPTable(1);
+                header.setTotalWidth(555);
+                Font normal =
+                        new Font(Font.HELVETICA, 12, Font.BOLD);
+                Font small =
+                        new Font(Font.HELVETICA, 10, Font.NORMAL);
+                Font tituloFont =
+                        new Font(Font.HELVETICA, 18, Font.BOLD);
+
+                // UNIVERSIDAD
+                PdfPCell cell1 = new PdfPCell(
+                        new Phrase(
+                                "UNIVERSIDAD NACIONAL \"SAN LUIS GONZAGA\"",
+                                normal
+                        )
+                );
+
+                cell1.setBorder(Rectangle.NO_BORDER);
+                cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+                cell1.setPaddingBottom(2);
+
+                // COMISION
+                PdfPCell cell2 = new PdfPCell(
+                        new Phrase(
+                                "COMISION EJECUTIVA CENTRAL DE ADMISION CEPU 2023",
+                                small
+                        )
+                );
+
+                cell2.setBorder(Rectangle.NO_BORDER);
+                cell2.setPaddingBottom(1);
+
+                // EXAMEN
+                PdfPCell cell3 = new PdfPCell(
+                        new Phrase(
+                                "EXAMEN DE ADMISION CEPU 2023 - I",
+                                small
+                        )
+                );
+
+                cell3.setBorder(Rectangle.NO_BORDER);
+                cell3.setPaddingBottom(10);
+
+                // TITULO
+                PdfPCell cell4 = new PdfPCell(
+                        new Phrase(
+                                "RESULTADOS POR CARRERA PROFESIONAL",
+                                tituloFont
+                        )
+                );
+
+                cell4.setBorder(Rectangle.NO_BORDER);
+                cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell4.setPaddingBottom(10);
+
+                // MODALIDAD
+                PdfPCell cell5 = new PdfPCell(
+                        new Phrase(
+                                "Modalidad: CENTRO DE ESTUDIOS PREUNIVERSITARIOS",
+                                normal
+                        )
+                );
+
+                cell5.setBorder(Rectangle.NO_BORDER);
+
+                // FACULTAD
+                PdfPCell cell6 = new PdfPCell(
+                        new Phrase(
+                                "Facultad: " + carrera.getfacultad(),
+                                normal
+                        )
+                );
+
+                cell6.setBorder(Rectangle.NO_BORDER);
+
+                // CARRERA
+                PdfPCell cell7 = new PdfPCell(
+                        new Phrase(
+                                "Carrera Profesional: " + carrera.getNombre(),
+                                normal
+                        )
+                );
+
+                cell7.setBorder(Rectangle.NO_BORDER);
+                cell7.setPaddingBottom(10);
+
+                header.addCell(cell1);
+                header.addCell(cell2);
+                header.addCell(cell3);
+                header.addCell(cell4);
+                header.addCell(cell5);
+                header.addCell(cell6);
+                header.addCell(cell7);
+
+                header.writeSelectedRows(
+                        0,
+                        -1,
+                        20,
+                        820,
+                        writer.getDirectContent()
+                );
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
